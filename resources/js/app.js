@@ -11,6 +11,7 @@ import 'vuetify/dist/vuetify.min.css'
 import 'material-design-icons-iconfont/dist/material-design-icons.css'
 import '@mdi/font/css/materialdesignicons.css'
 import MainApp from './components/MainApp.vue';
+import {initialize} from './helpers/general';
 const vuetifyOptions = { }
 Vue.use(Vuetify)
 Vue.use(VueRouter)
@@ -25,18 +26,7 @@ const router = new VueRouter({
     routes
 })
 
-router.beforeEach((to, from, next) => {
-  const requirestAuth = to.matched.some(record => record.meta.requirestAuth);
-  const currentUser = store.state.currentUser;
 
-  if(requirestAuth && !currentUser) {
-    next('/login');
-  } else if(to.path == '/login' && currentUser) {
-    next('/');
-  } else {
-    next();
-  }
-});
 
 export default new Vuetify({
     icons: {
@@ -44,7 +34,7 @@ export default new Vuetify({
     },
   })
 
-
+  initialize(store,router);
 
 const app = new Vue({
     el: '#app',

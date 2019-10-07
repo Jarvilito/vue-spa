@@ -10,16 +10,11 @@
 </template>
 
 <script>
-import { mapState } from "vuex";
 import Navbar from "./Navbar.vue";
-import Dashboard from "./Dashboard.vue";
-import RequisitionSlip from "./RequisitionSlip.vue";
 export default {
   name: "MainApp",
   components: {
-    Navbar,
-    Dashboard,
-    RequisitionSlip
+    Navbar
   }
 };
 </script>

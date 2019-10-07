@@ -34,7 +34,7 @@ export default {
         }
         
     },
-    mutation: {
+    mutations: {
         login(state) {
             state.loading = true;
             state.auth_error = null;
