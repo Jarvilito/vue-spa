@@ -11,10 +11,8 @@
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::get('/oitm/all/api', 'ApiController@getAllOITM');
 
-Auth::routes();
-
-Route::get('/home', 'HomeController@index')->name('home');
+Route::get('{any}', function () {
+    return view('layouts/master');
+})->where('any', '.*');
