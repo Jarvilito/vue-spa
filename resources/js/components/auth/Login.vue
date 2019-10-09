@@ -31,7 +31,7 @@
 
                   <v-card-actions>
                     <div class="flex-grow-1">
-                      <span class="font-weight-bold red--text">{{this.authError}}</span>
+                      <span v-if="this.authError" class="font-weight-bold red--text">{{this.authError}}</span>
                     </div>
                     <v-btn color="primary" type="submit" value="Login">Login</v-btn>
                   </v-card-actions>

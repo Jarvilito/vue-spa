@@ -7,6 +7,7 @@ import StoreData from './store';
 import VueRouter from 'vue-router';
 import Vuetify from 'vuetify';
 import {routes} from './routes';
+window.Cookies = require('js-cookie');
 import 'vuetify/dist/vuetify.min.css'
 import 'material-design-icons-iconfont/dist/material-design-icons.css'
 import '@mdi/font/css/materialdesignicons.css'

@@ -1,5 +1,5 @@
 import { getLocalUser } from "./helpers/auth";
-
+// import createPersistedState from 'vuex-persistedstate'
 const user = getLocalUser();
 
 export default {
@@ -45,7 +45,7 @@ export default {
             state.loading = false;
             state.currentUser = Object.assign({}, payload.user, {token: payload.access_token});
 
-            localStorage.setItem("user", JSON.stringify(state.currentUse))
+            localStorage.setItem("user", JSON.stringify(state.currentUser))
         },
         loginFailed(state, payload) {
             state.loading = false;
@@ -64,4 +64,10 @@ export default {
         }
 
     },
+    // plugins: [
+    //     createPersistedState({
+    //       getState: (key) => Cookies.getJSON(key),
+    //       setState: (key, state) => Cookies.set(key, state, { expires: 3, secure: true })
+    //     })
+    //   ]
 }
