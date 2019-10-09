@@ -1,73 +1,89 @@
-import { getLocalUser } from "./helpers/auth";
-// import createPersistedState from 'vuex-persistedstate'
-const user = getLocalUser();
-
 export default {
     state: {
-        post : 'im a post from state',
-        currentUser: user,
-        isLoggedIn: !!user,
-        loading: false,
-        auth_error: null,
-        customers: []
+        token: localStorage.getItem('access_token') || null,
+        authError : null,
+        
+
     },
     getters: {
 
-        post(state) {
-            return state.post;
+        isLoggedIn(state) {
+            return !!state.token;
         },
 
-        isLoading(state) {
-            return state.loading;
-        },
-        isLoggedIn(state) {
-            return state.isLoggedIn;
-        },
-        currentUser(state){
-            return state.currentUser;
-        },
-        authError(state){
-            return state.auth_error;
-        },
-        customers(state) {
-            return state.customers
+        authError(state) {
+            return state.authError;
         }
+
+
+
         
     },
     mutations: {
-        login(state) {
-            state.loading = true;
-            state.auth_error = null;
+        retrieveToken(state,token){
+            state.token = token;
+            state.authError = null
         },
-        loginSuccess(state, payload) {
-            state.auth_error = null;
-            state.isLoggedIn = true;
-            state.loading = false;
-            state.currentUser = Object.assign({}, payload.user, {token: payload.access_token});
 
-            localStorage.setItem("user", JSON.stringify(state.currentUser))
+        destroyToken(state) {
+            state.token = null
         },
-        loginFailed(state, payload) {
-            state.loading = false;
-            state.auth_error = payload.error;
+
+        authError(state) {
+            state.authError = 'Incorrect Password or Email'
         },
-        logout(state) {
-            localStorage.removeItem("user");
-            state.isLoggedIn = false;
-            state.currentUser = null;
-        }
+
+
     },
 
     actions: {
-        login(context) {
-            context.commit("login");
-        }
+
+        // laravel passport
+        retrieveToken(context, credentials)  {
+
+            return new Promise((resolve, reject) => {
+                axios.post('/login', {
+                    email: credentials.email,
+                    password: credentials.password
+                })
+                .then(response => {
+                    const token = response.data.access_token;
+                    localStorage.setItem('access_token', token);
+                    context.commit('retrieveToken', token);
+                    resolve(response);
+    
+                })
+                .catch(error => {
+                    context.commit('authError');
+                    console.log(error)
+                    reject(error);
+                })
+    
+            })
+
+        },
+        logout(context){
+            axios.defaults.headers.common['Authorization'] = 'Bearer ' +  context.state.token;
+
+            if (context.getters.isLoggedIn){
+                return new Promise((resolve, reject) => {
+                axios.post('/logout')
+                    .then(response => {
+                        localStorage.removeItem('access_token')
+                        context.commit('destroyToken')
+                        resolve(response)
+                    })
+                    .catch(error => {
+                        localStorage.removeItem('access_token')
+                        context.commit('destroyToken')
+                        reject(error)
+                    })
+                
+                })
+            }
+        },
+
 
     },
-    // plugins: [
-    //     createPersistedState({
-    //       getState: (key) => Cookies.getJSON(key),
-    //       setState: (key, state) => Cookies.set(key, state, { expires: 3, secure: true })
-    //     })
-    //   ]
+
 }

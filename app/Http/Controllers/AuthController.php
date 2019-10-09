@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\Request;
+use  Illuminate\Support\Facades\Route;
 
 use App\User;
 
@@ -29,9 +30,8 @@ class AuthController extends Controller
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function login()
+    public function login(Request $request)
     {
-
         // JWT AUTH
 
         // $credentials = request(['email', 'password']);
@@ -43,22 +43,36 @@ class AuthController extends Controller
         // return $this->respondWithToken($token);
 
         // PASSPORT AUTH
-        
-        $http = new \GuzzleHttp\Client;
 
-        $this->middleware('auth:api', ['except' => ['login']]);
 
          try {
-            $response = $http->post(config('services.passport.login_endpoint'), [
-                'form_params' => [
-                    'grant_type' => 'password',
-                    'client_id' => config('services.passport.client_id'),
-                    'client_secret' => config('services.passport.client_secret'),
-                    'username' => $request->username,
-                    'password' => $request->password,
-                ]
+            $email = $request->email;
+            $password = $request->password;
+            $request->request->add([
+                'username' => $email,
+                'password' => $password,
+                'grant_type' => 'password',
+                'client_id' => config('services.passport.client_id'),
+                'client_secret' => config('services.passport.client_secret')
             ]);
-            return $response->getBody();
+    
+            $tokenRequest = Request::create(
+                config('services.passport.login_endpoint'),
+                'post'
+            );
+            $response = Route::dispatch($tokenRequest);
+    
+    
+            return $response;
+            // $response = $http->post(config('services.passport.login_endpoint'), [
+            //     'form_params' => [
+            //         'grant_type' => 'password',
+            //         'client_id' => config('services.passport.client_id'),
+            //         'client_secret' => config('services.passport.client_secret'),
+            //         'username' => $request->username,
+            //         'password' => $request->password,
+            //     ]
+            // ]);
         } catch (\GuzzleHttp\Exception\BadResponseException $e) {
             if ($e->getCode() === 400) {
                 return response()->json('Invalid Request. Please enter a username or a password.', $e->getCode());
@@ -67,6 +81,8 @@ class AuthController extends Controller
             }
             return response()->json('Something went wrong on the server.', $e->getCode());
         }
+
+        
     }
 
     public function register(Request $request)

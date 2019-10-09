@@ -2237,13 +2237,6 @@ __webpack_require__.r(__webpack_exports__);
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony import */ var vuex__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! vuex */ "./node_modules/vuex/dist/vuex.esm.js");
-function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
-
-function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(source, true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(source).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
-
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-
 //
 //
 //
@@ -2291,8 +2284,8 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 //
 //
 //
-
-
+// import { mapGetters } from "vuex";
+// import { mapState } from "vuex";
 /* harmony default export */ __webpack_exports__["default"] = ({
   name: "navbar",
   data: function data() {
@@ -2316,11 +2309,20 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
   },
   methods: {
     logOut: function logOut() {
-      this.$store.commit("logout");
-      this.$router.push("/login");
+      var _this = this;
+
+      this.$store.dispatch("logout").then(function (response) {
+        _this.$router.push("/login");
+      });
     }
   },
-  computed: _objectSpread({}, Object(vuex__WEBPACK_IMPORTED_MODULE_0__["mapGetters"])(["currentUser"]), {}, Object(vuex__WEBPACK_IMPORTED_MODULE_0__["mapState"])(["post"]))
+  computed: {
+    isLoggedIn: function isLoggedIn() {
+      return this.$store.getters.isLoggedIn;
+    } // ...mapGetters(["currentUser"]),
+    // ...mapState(["post"])
+
+  }
 });
 
 /***/ }),
@@ -2742,14 +2744,6 @@ __webpack_require__.r(__webpack_exports__);
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _helpers_auth_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../helpers/auth.js */ "./resources/js/helpers/auth.js");
-/* harmony import */ var vuex__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! vuex */ "./node_modules/vuex/dist/vuex.esm.js");
-function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
-
-function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(source, true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(source).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
-
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-
 //
 //
 //
@@ -2797,18 +2791,19 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 //
 //
 //
-
-
-
+//
+//
+//
+// import { login } from "../../helpers/auth.js";
+// import { mapActions } from "vuex";
+// import { mapGetters } from "vuex";
 /* harmony default export */ __webpack_exports__["default"] = ({
   name: "login",
   data: function data() {
     return {
       valid: true,
-      form: {
-        email: "",
-        password: ""
-      },
+      username: "",
+      password: "",
       emailRules: [function (v) {
         return !!v || "E-mail is required";
       }, function (v) {
@@ -2821,31 +2816,37 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
   },
   methods: {
     validate: function validate() {
+      var _this = this;
+
       //   if (this.authError) {
       //     emailRules = this.emailRules.push(this.authError);
       //   }
       if (this.$refs.form.validate()) {
-        this.authenticate();
+        this.$store.dispatch("retrieveToken", {
+          email: this.username,
+          password: this.password
+        }).then(function (response) {
+          _this.$router.push("/");
+        });
       }
-    },
-    authenticate: function authenticate() {
-      var _this = this;
+    } // JWT AUATH
+    // authenticate() {
+    //   this.$store.dispatch("login");
+    //   login(this.$data.form)
+    //     .then(res => {
+    //       this.$store.commit("loginSuccess", res);
+    //       this.$router.push({ path: "/" });
+    //     })
+    //     .catch(error => {
+    //       this.$store.commit("loginFailed", { error });
+    //     });
 
-      this.$store.dispatch("login");
-      Object(_helpers_auth_js__WEBPACK_IMPORTED_MODULE_0__["login"])(this.$data.form).then(function (res) {
-        _this.$store.commit("loginSuccess", res);
-
-        _this.$router.push({
-          path: "/"
-        });
-      })["catch"](function (error) {
-        _this.$store.commit("loginFailed", {
-          error: error
-        });
-      });
-    }
   },
-  computed: _objectSpread({}, Object(vuex__WEBPACK_IMPORTED_MODULE_1__["mapGetters"])(["authError"]))
+  computed: {
+    authError: function authError() {
+      return this.$store.getters.authError;
+    }
+  }
 });
 
 /***/ }),
@@ -18134,184 +18135,6 @@ if ( !noGlobal ) {
 
 return jQuery;
 } );
-
-
-/***/ }),
-
-/***/ "./node_modules/js-cookie/src/js.cookie.js":
-/*!*************************************************!*\
-  !*** ./node_modules/js-cookie/src/js.cookie.js ***!
-  \*************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
- * JavaScript Cookie v2.2.1
- * https://github.com/js-cookie/js-cookie
- *
- * Copyright 2006, 2015 Klaus Hartl & Fagner Brack
- * Released under the MIT license
- */
-;(function (factory) {
-	var registeredInModuleLoader;
-	if (true) {
-		!(__WEBPACK_AMD_DEFINE_FACTORY__ = (factory),
-				__WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ?
-				(__WEBPACK_AMD_DEFINE_FACTORY__.call(exports, __webpack_require__, exports, module)) :
-				__WEBPACK_AMD_DEFINE_FACTORY__),
-				__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
-		registeredInModuleLoader = true;
-	}
-	if (true) {
-		module.exports = factory();
-		registeredInModuleLoader = true;
-	}
-	if (!registeredInModuleLoader) {
-		var OldCookies = window.Cookies;
-		var api = window.Cookies = factory();
-		api.noConflict = function () {
-			window.Cookies = OldCookies;
-			return api;
-		};
-	}
-}(function () {
-	function extend () {
-		var i = 0;
-		var result = {};
-		for (; i < arguments.length; i++) {
-			var attributes = arguments[ i ];
-			for (var key in attributes) {
-				result[key] = attributes[key];
-			}
-		}
-		return result;
-	}
-
-	function decode (s) {
-		return s.replace(/(%[0-9A-Z]{2})+/g, decodeURIComponent);
-	}
-
-	function init (converter) {
-		function api() {}
-
-		function set (key, value, attributes) {
-			if (typeof document === 'undefined') {
-				return;
-			}
-
-			attributes = extend({
-				path: '/'
-			}, api.defaults, attributes);
-
-			if (typeof attributes.expires === 'number') {
-				attributes.expires = new Date(new Date() * 1 + attributes.expires * 864e+5);
-			}
-
-			// We're using "expires" because "max-age" is not supported by IE
-			attributes.expires = attributes.expires ? attributes.expires.toUTCString() : '';
-
-			try {
-				var result = JSON.stringify(value);
-				if (/^[\{\[]/.test(result)) {
-					value = result;
-				}
-			} catch (e) {}
-
-			value = converter.write ?
-				converter.write(value, key) :
-				encodeURIComponent(String(value))
-					.replace(/%(23|24|26|2B|3A|3C|3E|3D|2F|3F|40|5B|5D|5E|60|7B|7D|7C)/g, decodeURIComponent);
-
-			key = encodeURIComponent(String(key))
-				.replace(/%(23|24|26|2B|5E|60|7C)/g, decodeURIComponent)
-				.replace(/[\(\)]/g, escape);
-
-			var stringifiedAttributes = '';
-			for (var attributeName in attributes) {
-				if (!attributes[attributeName]) {
-					continue;
-				}
-				stringifiedAttributes += '; ' + attributeName;
-				if (attributes[attributeName] === true) {
-					continue;
-				}
-
-				// Considers RFC 6265 section 5.2:
-				// ...
-				// 3.  If the remaining unparsed-attributes contains a %x3B (";")
-				//     character:
-				// Consume the characters of the unparsed-attributes up to,
-				// not including, the first %x3B (";") character.
-				// ...
-				stringifiedAttributes += '=' + attributes[attributeName].split(';')[0];
-			}
-
-			return (document.cookie = key + '=' + value + stringifiedAttributes);
-		}
-
-		function get (key, json) {
-			if (typeof document === 'undefined') {
-				return;
-			}
-
-			var jar = {};
-			// To prevent the for loop in the first place assign an empty array
-			// in case there are no cookies at all.
-			var cookies = document.cookie ? document.cookie.split('; ') : [];
-			var i = 0;
-
-			for (; i < cookies.length; i++) {
-				var parts = cookies[i].split('=');
-				var cookie = parts.slice(1).join('=');
-
-				if (!json && cookie.charAt(0) === '"') {
-					cookie = cookie.slice(1, -1);
-				}
-
-				try {
-					var name = decode(parts[0]);
-					cookie = (converter.read || converter)(cookie, name) ||
-						decode(cookie);
-
-					if (json) {
-						try {
-							cookie = JSON.parse(cookie);
-						} catch (e) {}
-					}
-
-					jar[name] = cookie;
-
-					if (key === name) {
-						break;
-					}
-				} catch (e) {}
-			}
-
-			return key ? jar[key] : jar;
-		}
-
-		api.set = set;
-		api.get = function (key) {
-			return get(key, false /* read as raw */);
-		};
-		api.getJSON = function (key) {
-			return get(key, true /* read as json */);
-		};
-		api.remove = function (key, attributes) {
-			set(key, '', extend(attributes, {
-				expires: -1
-			}));
-		};
-
-		api.defaults = {};
-
-		api.withConverter = init;
-
-		return api;
-	}
-
-	return init(function () {});
-}));
 
 
 /***/ }),
@@ -39579,7 +39402,7 @@ var render = function() {
     "nav",
     { staticClass: "mb-4" },
     [
-      _vm.currentUser
+      _vm.isLoggedIn
         ? [
             _c(
               "v-navigation-drawer",
@@ -39599,13 +39422,9 @@ var render = function() {
                   "v-list",
                   { attrs: { rounded: "", dark: "" } },
                   [
-                    _c(
-                      "v-subheader",
-                      {
-                        staticClass: "font-italic font-weight-medium headline"
-                      },
-                      [_vm._v(_vm._s(_vm.currentUser.name))]
-                    ),
+                    _c("v-subheader", {
+                      staticClass: "font-italic font-weight-medium headline"
+                    }),
                     _vm._v(" "),
                     _c("v-divider"),
                     _vm._v(" "),
@@ -39665,7 +39484,7 @@ var render = function() {
         "v-app-bar",
         { attrs: { app: "" } },
         [
-          _vm.currentUser
+          _vm.isLoggedIn
             ? _c("v-app-bar-nav-icon", {
                 on: {
                   click: function($event) {
@@ -39684,7 +39503,7 @@ var render = function() {
           _vm._v(" "),
           _c("v-spacer"),
           _vm._v(" "),
-          _vm.currentUser
+          _vm.isLoggedIn
             ? _c(
                 "v-btn",
                 {
@@ -39702,7 +39521,7 @@ var render = function() {
               )
             : _vm._e(),
           _vm._v(" "),
-          !_vm.currentUser
+          !_vm.isLoggedIn
             ? [
                 _c(
                   "v-btn",
@@ -40514,11 +40333,11 @@ var render = function() {
                                       required: ""
                                     },
                                     model: {
-                                      value: _vm.form.email,
+                                      value: _vm.username,
                                       callback: function($$v) {
-                                        _vm.$set(_vm.form, "email", $$v)
+                                        _vm.username = $$v
                                       },
-                                      expression: "form.email"
+                                      expression: "username"
                                     }
                                   }),
                                   _vm._v(" "),
@@ -40531,11 +40350,11 @@ var render = function() {
                                       type: "password"
                                     },
                                     model: {
-                                      value: _vm.form.password,
+                                      value: _vm.password,
                                       callback: function($$v) {
-                                        _vm.$set(_vm.form, "password", $$v)
+                                        _vm.password = $$v
                                       },
-                                      expression: "form.password"
+                                      expression: "password"
                                     }
                                   }),
                                   _vm._v(" "),
@@ -93267,7 +93086,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _mdi_font_css_materialdesignicons_css__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! @mdi/font/css/materialdesignicons.css */ "./node_modules/@mdi/font/css/materialdesignicons.css");
 /* harmony import */ var _mdi_font_css_materialdesignicons_css__WEBPACK_IMPORTED_MODULE_7___default = /*#__PURE__*/__webpack_require__.n(_mdi_font_css_materialdesignicons_css__WEBPACK_IMPORTED_MODULE_7__);
 /* harmony import */ var _components_MainApp_vue__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./components/MainApp.vue */ "./resources/js/components/MainApp.vue");
-/* harmony import */ var _helpers_general__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./helpers/general */ "./resources/js/helpers/general.js");
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_9___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_9__);
 __webpack_require__(/*! ./bootstrap */ "./resources/js/bootstrap.js");
 
 window.Vue = __webpack_require__(/*! vue */ "./node_modules/vue/dist/vue.common.js");
@@ -93276,7 +93096,6 @@ window.Vue = __webpack_require__(/*! vue */ "./node_modules/vue/dist/vue.common.
 
 
 
-window.Cookies = __webpack_require__(/*! js-cookie */ "./node_modules/js-cookie/src/js.cookie.js");
 
 
 
@@ -93286,11 +93105,41 @@ var vuetifyOptions = {};
 Vue.use(vuetify__WEBPACK_IMPORTED_MODULE_3___default.a);
 Vue.use(vue_router__WEBPACK_IMPORTED_MODULE_2__["default"]);
 Vue.use(vuex__WEBPACK_IMPORTED_MODULE_0__["default"]);
+axios.defaults.baseURL = "http://127.0.0.1:8000/api";
 var store = new vuex__WEBPACK_IMPORTED_MODULE_0__["default"].Store(_store__WEBPACK_IMPORTED_MODULE_1__["default"]);
 var router = new vue_router__WEBPACK_IMPORTED_MODULE_2__["default"]({
   mode: 'history',
   linkActiveClass: 'active',
   routes: _routes__WEBPACK_IMPORTED_MODULE_4__["routes"]
+});
+router.beforeEach(function (to, from, next) {
+  if (to.matched.some(function (record) {
+    return record.meta.requiresAuth;
+  })) {
+    // this route requires auth, check if logged in
+    // if not, redirect to login page.
+    if (!store.getters.isLoggedIn) {
+      next({
+        path: '/login'
+      });
+    } else {
+      next();
+    }
+  } else if (to.matched.some(function (record) {
+    return record.meta.requiresVisitor;
+  })) {
+    // this route requires auth, check if logged in
+    // if not, redirect to login page.
+    if (store.getters.isLoggedIn) {
+      next({
+        path: '/'
+      });
+    } else {
+      next();
+    }
+  } else {
+    next(); // make sure to always call next()!
+  }
 });
 /* harmony default export */ __webpack_exports__["default"] = (new vuetify__WEBPACK_IMPORTED_MODULE_3___default.a({
   icons: {
@@ -93298,7 +93147,6 @@ var router = new vue_router__WEBPACK_IMPORTED_MODULE_2__["default"]({
 
   }
 }));
-Object(_helpers_general__WEBPACK_IMPORTED_MODULE_9__["initialize"])(store, router);
 var app = new Vue({
   el: '#app',
   router: router,
@@ -93808,88 +93656,6 @@ __webpack_require__.r(__webpack_exports__);
 
 /***/ }),
 
-/***/ "./resources/js/helpers/auth.js":
-/*!**************************************!*\
-  !*** ./resources/js/helpers/auth.js ***!
-  \**************************************/
-/*! exports provided: login, getLocalUser */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "login", function() { return login; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getLocalUser", function() { return getLocalUser; });
-/* harmony import */ var _general__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./general */ "./resources/js/helpers/general.js");
-
-function login(credentials) {
-  return new Promise(function (res, rej) {
-    axios.post('/api/auth/login', credentials).then(function (response) {
-      Object(_general__WEBPACK_IMPORTED_MODULE_0__["setAuthorization"])(response.data.access_token);
-      res(response.data);
-    })["catch"](function (err) {
-      rej("Wrong email or password");
-    });
-  });
-}
-function getLocalUser() {
-  var userStr = localStorage.getItem("user");
-
-  if (!userStr) {
-    return null;
-  }
-
-  if (userStr !== 'undefined') {
-    return JSON.parse(userStr);
-  }
-}
-
-/***/ }),
-
-/***/ "./resources/js/helpers/general.js":
-/*!*****************************************!*\
-  !*** ./resources/js/helpers/general.js ***!
-  \*****************************************/
-/*! exports provided: initialize, setAuthorization */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "initialize", function() { return initialize; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "setAuthorization", function() { return setAuthorization; });
-function initialize(store, router) {
-  router.beforeEach(function (to, from, next) {
-    var requiresAuth = to.matched.some(function (record) {
-      return record.meta.requiresAuth;
-    });
-    var currentUser = store.state.currentUser;
-
-    if (requiresAuth && !currentUser) {
-      next('/login');
-    } else if (to.path == '/login' && currentUser) {
-      next('/');
-    } else {
-      next();
-    }
-  });
-  axios.interceptors.response.use(null, function (error) {
-    if (error.resposne.status == 401) {
-      store.commit('logout');
-      router.push('/login');
-    }
-
-    return Promise.reject(error);
-  });
-
-  if (store.getters.currentUser) {
-    setAuthorization(store.getters.currentUser.token);
-  }
-}
-function setAuthorization(token) {
-  axios.defaults.headers.common["Authorization"] = "Bearer ".concat(token);
-}
-
-/***/ }),
-
 /***/ "./resources/js/routes.js":
 /*!********************************!*\
   !*** ./resources/js/routes.js ***!
@@ -93926,7 +93692,10 @@ var routes = [{
   }
 }, {
   path: '/login',
-  component: __webpack_require__(/*! ./components/auth/Login.vue */ "./resources/js/components/auth/Login.vue")["default"]
+  component: __webpack_require__(/*! ./components/auth/Login.vue */ "./resources/js/components/auth/Login.vue")["default"],
+  meta: {
+    requiresVisitor: true
+  }
 }];
 
 /***/ }),
@@ -93940,74 +93709,68 @@ var routes = [{
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _helpers_auth__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./helpers/auth */ "./resources/js/helpers/auth.js");
- // import createPersistedState from 'vuex-persistedstate'
-
-var user = Object(_helpers_auth__WEBPACK_IMPORTED_MODULE_0__["getLocalUser"])();
 /* harmony default export */ __webpack_exports__["default"] = ({
   state: {
-    post: 'im a post from state',
-    currentUser: user,
-    isLoggedIn: !!user,
-    loading: false,
-    auth_error: null,
-    customers: []
+    token: localStorage.getItem('access_token') || null,
+    authError: null
   },
   getters: {
-    post: function post(state) {
-      return state.post;
-    },
-    isLoading: function isLoading(state) {
-      return state.loading;
-    },
     isLoggedIn: function isLoggedIn(state) {
-      return state.isLoggedIn;
-    },
-    currentUser: function currentUser(state) {
-      return state.currentUser;
+      return !!state.token;
     },
     authError: function authError(state) {
-      return state.auth_error;
-    },
-    customers: function customers(state) {
-      return state.customers;
+      return state.authError;
     }
   },
   mutations: {
-    login: function login(state) {
-      state.loading = true;
-      state.auth_error = null;
+    retrieveToken: function retrieveToken(state, token) {
+      state.token = token;
+      state.authError = null;
     },
-    loginSuccess: function loginSuccess(state, payload) {
-      state.auth_error = null;
-      state.isLoggedIn = true;
-      state.loading = false;
-      state.currentUser = Object.assign({}, payload.user, {
-        token: payload.access_token
-      });
-      localStorage.setItem("user", JSON.stringify(state.currentUser));
+    destroyToken: function destroyToken(state) {
+      state.token = null;
     },
-    loginFailed: function loginFailed(state, payload) {
-      state.loading = false;
-      state.auth_error = payload.error;
-    },
-    logout: function logout(state) {
-      localStorage.removeItem("user");
-      state.isLoggedIn = false;
-      state.currentUser = null;
+    authError: function authError(state) {
+      state.authError = 'Incorrect Password or Email';
     }
   },
   actions: {
-    login: function login(context) {
-      context.commit("login");
-    }
-  } // plugins: [
-  //     createPersistedState({
-  //       getState: (key) => Cookies.getJSON(key),
-  //       setState: (key, state) => Cookies.set(key, state, { expires: 3, secure: true })
-  //     })
-  //   ]
+    // laravel passport
+    retrieveToken: function retrieveToken(context, credentials) {
+      return new Promise(function (resolve, reject) {
+        axios.post('/login', {
+          email: credentials.email,
+          password: credentials.password
+        }).then(function (response) {
+          var token = response.data.access_token;
+          localStorage.setItem('access_token', token);
+          context.commit('retrieveToken', token);
+          resolve(response);
+        })["catch"](function (error) {
+          context.commit('authError');
+          console.log(error);
+          reject(error);
+        });
+      });
+    },
+    logout: function logout(context) {
+      axios.defaults.headers.common['Authorization'] = 'Bearer ' + context.state.token;
 
+      if (context.getters.isLoggedIn) {
+        return new Promise(function (resolve, reject) {
+          axios.post('/logout').then(function (response) {
+            localStorage.removeItem('access_token');
+            context.commit('destroyToken');
+            resolve(response);
+          })["catch"](function (error) {
+            localStorage.removeItem('access_token');
+            context.commit('destroyToken');
+            reject(error);
+          });
+        });
+      }
+    }
+  }
 });
 
 /***/ }),

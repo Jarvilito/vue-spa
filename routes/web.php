@@ -13,6 +13,7 @@
 
 Route::get('/oitm/all/api', 'ApiController@getAllOITM');
 
+// jWT
 Route::get('{any}', function () {
     return view('layouts/master');
 })->where('any', '.*');
