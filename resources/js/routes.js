@@ -9,7 +9,7 @@ export const routes = [
     }
   },
     { 
-      path: '/requisition-slip', component: require('./components/RequisitionSlip.vue').default,      
+      path: '/requisition-slip', component: require('./components/requisition-slip/Main.vue').default,      
       meta: {
         requiresAuth: true,
       }

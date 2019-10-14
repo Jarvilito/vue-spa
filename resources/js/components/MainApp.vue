@@ -15,6 +15,9 @@ export default {
   name: "MainApp",
   components: {
     Navbar
+  },
+  created() {
+    this.$store.dispatch("getUserInfo");
   }
 };
 </script>

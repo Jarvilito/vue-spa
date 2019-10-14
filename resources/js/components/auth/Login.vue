@@ -80,6 +80,9 @@ export default {
           })
           .then(response => {
             this.$router.push("/");
+          })
+          .then(response => {
+            this.$store.dispatch("getUserInfo");
           });
       }
     }

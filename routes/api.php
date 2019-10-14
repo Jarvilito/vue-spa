@@ -12,17 +12,28 @@ use Illuminate\Http\Request;
 | is assigned the "api" middleware group. Enjoy building your API!
 |
 */
-Route::middleware('auth:api')->get('/user', function (Request $request) {
-    return $request->user();
+
+Route::middleware('auth:api')->group(function () {
+    Route::get('/requisition-slip', 'RequisitionSlipController@index');
+    Route::post('/requisition-slip/create', 'RequisitionSlipController@store');
+    Route::post('/logout', 'AuthController@logout');
+    Route::get('/user', function (Request $request) {
+        return $request->user();
+    });
 });
+
+
 
 
 Route::post('/login' , 'AuthController@login');
 
 Route::post('/register' , 'AuthController@register');
 
-Route::middleware('auth:api')->post('/logout', 'AuthController@logout');
 
+
+// Route::get('/requisition-slip', 'RequisitionSlipController@index');
+// Route::get('/requisition-slip', 'RequisitionSlipController@index');
+// Route::get('/requisition-slip', 'RequisitionSlipController@index');
 
 
 // JWT AUTH

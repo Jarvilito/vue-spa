@@ -3,7 +3,7 @@
     <template v-if="isLoggedIn">
       <v-navigation-drawer v-model="drawer" app color="purple darken-3" class="pt-4 pb-4">
         <v-list rounded dark>
-          <v-subheader class="font-italic font-weight-medium headline"></v-subheader>
+          <v-subheader class="font-italic font-weight-medium headline">{{getUser}}</v-subheader>
           <v-divider></v-divider>
           <v-list-item-group v-model="item" color="white">
             <v-list-item v-for="(link,i) in links" :key="i" router :to="link.route">
@@ -76,6 +76,11 @@ export default {
   },
 
   computed: {
+    getUser() {
+      return this.$store.getters.getCurrentUser
+        ? this.$store.getters.getCurrentUser.name
+        : null;
+    },
     isLoggedIn() {
       return this.$store.getters.isLoggedIn;
     }
