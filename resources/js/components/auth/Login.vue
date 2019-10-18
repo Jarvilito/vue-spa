@@ -12,7 +12,7 @@
               <v-card-text>
                 <v-form @submit.prevent="validate" ref="form" v-model="valid" lazy-validation>
                   <v-text-field
-                    v-model="form.email"
+                    v-model="username"
                     :rules="emailRules"
                     name="login"
                     prepend-icon="person"
@@ -22,7 +22,7 @@
 
                   <v-text-field
                     id="password"
-                    v-model="form.password"
+                    v-model="password"
                     :rules="passwordRules"
                     name="password"
                     prepend-icon="lock"
@@ -31,7 +31,10 @@
 
                   <v-card-actions>
                     <div class="flex-grow-1">
-                      <span class="font-weight-bold red--text">{{this.authError}}</span>
+                      <span
+                        v-if="this.authError"
+                        class="font-weight-bold red--text"
+                      >{{this.authError}}</span>
                     </div>
                     <v-btn color="primary" type="submit" value="Login">Login</v-btn>
                   </v-card-actions>
@@ -46,18 +49,16 @@
 </template>
 
 <script>
-import { login } from "../../helpers/auth.js";
-import { mapActions } from "vuex";
-import { mapGetters } from "vuex";
+// import { login } from "../../helpers/auth.js";
+// import { mapActions } from "vuex";
+// import { mapGetters } from "vuex";
 export default {
   name: "login",
   data() {
     return {
       valid: true,
-      form: {
-        email: "",
-        password: ""
-      },
+      username: "",
+      password: "",
       emailRules: [
         v => !!v || "E-mail is required",
         v => /.+@.+\..+/.test(v) || "E-mail must be valid"
@@ -72,23 +73,36 @@ export default {
       //     emailRules = this.emailRules.push(this.authError);
       //   }
       if (this.$refs.form.validate()) {
-        this.authenticate();
+        this.$store
+          .dispatch("retrieveToken", {
+            email: this.username,
+            password: this.password
+          })
+          .then(response => {
+            this.$router.push("/");
+          })
+          .then(response => {
+            this.$store.dispatch("getUserInfo");
+          });
       }
-    },
-    authenticate() {
-      this.$store.dispatch("login");
-      login(this.$data.form)
-        .then(res => {
-          this.$store.commit("loginSuccess", res);
-          this.$router.push({ path: "/" });
-        })
-        .catch(error => {
-          this.$store.commit("loginFailed", { error });
-        });
     }
+
+    // JWT AUATH
+    // authenticate() {
+    //   this.$store.dispatch("login");
+    //   login(this.$data.form)
+    //     .then(res => {
+    //       this.$store.commit("loginSuccess", res);
+    //       this.$router.push({ path: "/" });
+    //     })
+    //     .catch(error => {
+    //       this.$store.commit("loginFailed", { error });
+    //     });
   },
   computed: {
-    ...mapGetters(["authError"])
+    authError() {
+      return this.$store.getters.authError;
+    }
   }
 };
 </script>

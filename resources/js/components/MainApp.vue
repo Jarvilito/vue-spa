@@ -1,12 +1,14 @@
 <template>
-  <v-app>
-    <Navbar />
-    <div class="container-fluid mt-4">
-      <v-content>
-        <router-view></router-view>
-      </v-content>
-    </div>
-  </v-app>
+  <div>
+    <v-app>
+      <Navbar />
+      <div class="container-fluid mt-4">
+        <v-content>
+          <router-view></router-view>
+        </v-content>
+      </div>
+    </v-app>
+  </div>
 </template>
 
 <script>
@@ -15,6 +17,9 @@ export default {
   name: "MainApp",
   components: {
     Navbar
+  },
+  created() {
+    this.$store.dispatch("getUserInfo");
   }
 };
 </script>
