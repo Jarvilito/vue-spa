@@ -135,7 +135,75 @@ class RequisitionSlipController extends Controller
      */
     public function update(Request $request, RequisitionSlip $requisitionSlip)
     {
-        //
+        $id = $request->get('id');
+        $isDeletedArray = $request->get('lineDetailsDeleted'); 
+        $lineDetailsArray = $request->lineDetails;
+        RequisitionSlip::find($id)->update([
+            'U_ProjectID' => $request->projectId,
+            'user_id' => auth()->user()->id,
+            'U_ProjName' => $request->projectName,
+            'U_Location' => $request->location,
+            'card_name'  => 'Kahit ano',
+            'U_CardCode' => $request->supplier,
+            'U_PrefSupplier' => $request->preferredSupplier,
+            'U_PreparedBy' => $request->preparedBy,
+            'U_DocNum' => $request->documentNumber,
+            'U_DocStatus' => $request->status,
+            'U_TaxDate' => $request->documentDate,
+            'U_ReqDate' => $request->requiredDate,
+            'U_Urgency' => $request->urgencyPriority,
+            'U_CheckedBy' => $request->checkedBy,
+        ]);
+
+        foreach($lineDetailsArray as $key => $lineDetailArray)
+        {
+            $lineId = $lineDetailsArray[$key]['id'];
+
+            if($lineId)
+            {
+                RequisitionSlipLineDetails::find($lineId)->update([
+                    'U_ItemCode'    => $lineDetailsArray[$key]['itemCode'],
+                    'U_Dscription'  => $lineDetailsArray[$key]['itemDescription'],
+                    'U_Scope'  => $lineDetailsArray[$key]['scopeOfWork'],
+                    'U_ScopeDesc'  => $lineDetailsArray[$key]['scopeDescription'],
+                    'U_MaterialCode'  => $lineDetailsArray[$key]['materialCode'],
+                    'U_MaterialDesc'  => $lineDetailsArray[$key]['materialDescription'],
+                    'U_Quantity'  => $lineDetailsArray[$key]['quantity'],
+                    'U_InfoPrice'  => $lineDetailsArray[$key]['infoPrice'],
+                    'U_UomCode'  => $lineDetailsArray[$key]['uom'],
+                    'U_LineRemarks'  => $lineDetailsArray[$key]['lineRemarks'],
+                ]);                
+            }
+            else
+            {
+                RequisitionSlipLineDetails::create([
+                    'user_id' => auth()->user()->id,
+                    'requisition_slip_id' => $id,
+                    'U_ItemCode'    => $lineDetailsArray[$key]['itemCode'],
+                    'U_Dscription'  => $lineDetailsArray[$key]['itemDescription'],
+                    'U_Scope'  => $lineDetailsArray[$key]['scopeOfWork'],
+                    'U_ScopeDesc'  => $lineDetailsArray[$key]['scopeDescription'],
+                    'U_MaterialCode'  => $lineDetailsArray[$key]['materialCode'],
+                    'U_MaterialDesc'  => $lineDetailsArray[$key]['materialDescription'],
+                    'U_Quantity'  => $lineDetailsArray[$key]['quantity'],
+                    'U_InfoPrice'  => $lineDetailsArray[$key]['infoPrice'],
+                    'U_UomCode'  => $lineDetailsArray[$key]['uom'],
+                    'U_LineRemarks'  => $lineDetailsArray[$key]['lineRemarks'],
+                ]);
+            }
+
+        }
+        
+        if(count($isDeletedArray) > 0)
+        {
+            foreach($isDeletedArray as $item)
+            {
+                RequisitionSlipLineDetails::destroy($item);
+            }
+        }
+
+       
+        return response('Ok',201);
     }
 
     /**

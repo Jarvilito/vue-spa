@@ -4,17 +4,27 @@
       <v-progress-circular indeterminate size="64"></v-progress-circular>
     </v-overlay>
     <v-dialog persistent v-model="dialog" max-width="80%">
+      <v-overlay :value="overlayInside">
+        <v-progress-circular indeterminate size="64"></v-progress-circular>
+      </v-overlay>
       <v-card class="text-uppercase">
-        <v-card-title>
-          <span class="teal--text text--darken-4">Edit Requisition Slip</span>
-        </v-card-title>
-        <v-divider></v-divider>
-        <v-card-text>
-          <v-form class="px-3">
+        <v-list-item>
+          <v-list-item-avatar color="light-blue ">
+            <v-icon dark>mdi-file-document-edit-outline</v-icon>
+          </v-list-item-avatar>
+          <v-list-item-content>
+            <v-list-item-title class="headline">EDIT REQUISITION SLIP</v-list-item-title>
+            <v-list-item-subtitle>Created By {{this.form.preparedBy}}</v-list-item-subtitle>
+          </v-list-item-content>
+        </v-list-item>
+        <v-card-text class="mt-4">
+          <v-form ref="form" v-model="valid" lazy-validation class="px-3">
             <v-row>
               <v-col sm="12" md="5">
                 <v-text-field
                   dense
+                  :rules="rules.projectIdRules"
+                  required
                   prepend-icon="vpn_key"
                   clearable
                   v-model="form.projectId"
@@ -24,7 +34,7 @@
               <v-col offset-md="2" sm="12" md="5">
                 <v-text-field
                   color="purple darken-2"
-                  dense
+                  required
                   prepend-icon="mdi-file-document-box-plus-outline"
                   readonly
                   v-model="form.documentNumber"
@@ -36,6 +46,8 @@
               <v-col sm="12" md="5">
                 <v-text-field
                   dense
+                  :rules="rules.projectNameRules"
+                  required
                   prepend-icon="mdi-account-card-details-outline"
                   clearable
                   v-model="form.projectName"
@@ -46,7 +58,6 @@
                 <v-text-field
                   dense
                   prepend-icon="check_circle_outline"
-                  readonly
                   v-model="form.status"
                   label="Status"
                 ></v-text-field>
@@ -57,6 +68,8 @@
               <v-col sm="12" md="5">
                 <v-text-field
                   dense
+                  :rules="rules.locationRules"
+                  required
                   prepend-icon="place"
                   clearable
                   v-model="form.location"
@@ -78,6 +91,8 @@
               <v-col sm="12" md="5">
                 <v-text-field
                   dense
+                  :rules="rules.supplierRules"
+                  required
                   prepend-icon="fas fa-parachute-box"
                   clearable
                   v-model="form.supplier"
@@ -89,6 +104,8 @@
                   <template v-slot:activator="{ on }">
                     <v-text-field
                       dense
+                      :rules="rules.requiredDateRules"
+                      required
                       prepend-icon="date_range"
                       label="Required Date"
                       readonly
@@ -105,6 +122,8 @@
               <v-col sm="12" md="5">
                 <v-text-field
                   dense
+                  :rules="rules.preferredSupplierRules"
+                  required
                   prepend-icon="far fa-thumbs-up"
                   clearable
                   v-model="form.preferredSupplier"
@@ -112,13 +131,19 @@
                 ></v-text-field>
               </v-col>
               <v-col offset-md="2" sm="12" md="5">
-                <v-text-field
-                  dense
+                <v-select
+                  height="35"
+                  :items="urgency"
+                  item-value="value"
+                  item-text="text"
+                  menu-props="auto"
+                  :rules="rules.urgencyPriorityRules"
+                  required
                   prepend-icon="access_time"
                   clearable
                   v-model="form.urgencyPriority"
                   label="Urgency Priority"
-                ></v-text-field>
+                ></v-select>
               </v-col>
             </v-row>
 
@@ -176,6 +201,8 @@
                       <td>{{index + 1}}</td>
                       <td>
                         <v-text-field
+                          required
+                          :rules="rules.itemCodeRules"
                           v-model="lineDetail.itemCode"
                           clearable
                           placeholder="Item Code"
@@ -183,6 +210,8 @@
                       </td>
                       <td>
                         <v-text-field
+                          required
+                          :rules="rules.itemDescriptionRules"
                           v-model="lineDetail.itemDescription"
                           clearable
                           placeholder="Item Description"
@@ -190,6 +219,8 @@
                       </td>
                       <td>
                         <v-text-field
+                          required
+                          :rules="rules.scopeOfWorkRules"
                           v-model="lineDetail.scopeOfWork"
                           clearable
                           placeholder="Scope of Work"
@@ -197,13 +228,19 @@
                       </td>
                       <td>
                         <v-text-field
-                          v-model="lineDetail.scopeDesription"
+                          required
+                          :rules="rules.scopeDescriptionRules"
+                          v-model="lineDetail.scopeDescription"
                           clearable
                           placeholder="Scope Description"
                         ></v-text-field>
                       </td>
                       <td>
                         <v-text-field
+                          required
+                          readonly
+                          @click="getOitm(index)"
+                          :rules="rules.materialCodeRules"
                           v-model="lineDetail.materialCode"
                           clearable
                           placeholder="Material Code"
@@ -211,6 +248,8 @@
                       </td>
                       <td>
                         <v-text-field
+                          required
+                          :rules="rules.materialDescriptionRules"
                           v-model="lineDetail.materialDescription"
                           clearable
                           placeholder="Material Description"
@@ -218,6 +257,8 @@
                       </td>
                       <td>
                         <v-text-field
+                          required
+                          :rules="rules.quantityRules"
                           v-model="lineDetail.quantity"
                           clearable
                           type="number"
@@ -226,6 +267,8 @@
                       </td>
                       <td>
                         <v-text-field
+                          required
+                          :rules="rules.infoPriceRules"
                           v-model="lineDetail.infoPrice"
                           clearable
                           type="number"
@@ -233,7 +276,13 @@
                         ></v-text-field>
                       </td>
                       <td>
-                        <v-text-field v-model="lineDetail.uom" clearable placeholder="UoM"></v-text-field>
+                        <v-text-field
+                          required
+                          :rules="rules.uomRules"
+                          v-model="lineDetail.uom"
+                          clearable
+                          placeholder="UoM"
+                        ></v-text-field>
                       </td>
 
                       <td>
@@ -258,8 +307,14 @@
         </v-card-text>
         <v-card-actions>
           <div class="flex-grow-1"></div>
-          <v-btn color="green darken-1" text @click="createItem">CREATE</v-btn>
-          <v-btn color="red darken-1" text @click="cancelConfimationDialog = true">CANCEL</v-btn>
+          <v-btn
+            color="green darken-1"
+            text
+            :disabled="!valid"
+            x-large
+            @click="updateConfirmationModal = true"
+          >UPDATE</v-btn>
+          <v-btn color="red darken-1" text x-large @click="cancelConfimationDialog = true">CANCEL</v-btn>
         </v-card-actions>
       </v-card>
 
@@ -270,8 +325,23 @@
           <v-card-text>Cancelling your form will reset all your input, Are you sure you want to cancel this form?</v-card-text>
           <v-card-actions>
             <div class="flex-grow-1"></div>
-            <v-btn color="green darken-1" text @click="close">Yes</v-btn>
-            <v-btn color="red darken-1" text @click="cancelConfimationDialog = false">No</v-btn>
+            <v-btn x-large color="green darken-1" text @click="close">Yes</v-btn>
+            <v-btn x-large color="red darken-1" text @click="cancelConfimationDialog = false">No</v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
+
+      <!-- UPDATE CONFIRMATION -->
+      <!-- SUBMIT CONFIRMATION DIALOG -->
+      <v-dialog v-model="updateConfirmationModal" width="350">
+        <v-card>
+          <v-card-title class="headline blue--text">Update Requisition Slip?</v-card-title>
+          <v-card-text>Are you sure you want to update your form?</v-card-text>
+          <v-card-actions>
+            <div class="flex-grow-1"></div>
+            <v-btn x-large color="green darken-1" text @click="updateItem">Yes</v-btn>
+
+            <v-btn x-large color="red darken-1" text @click="updateConfirmationModal = false">No</v-btn>
           </v-card-actions>
         </v-card>
       </v-dialog>
@@ -287,13 +357,50 @@ import { mapState } from "vuex";
 import { mapActions } from "vuex";
 
 export default {
-  name: "EditRequisition",
   data: () => ({
+    valid: true,
+    rules: {
+      projectNameRules: [v => !!v || "Project namme is required"],
+      projectIdRules: [v => !!v || "Project Id is required"],
+      locationRules: [v => !!v || "Location is required"],
+      supplierRules: [v => !!v || "Supplier is required"],
+      requiredDateRules: [v => !!v || "Required date is required"],
+      preferredSupplierRules: [v => !!v || "Preferred Supplier is required"],
+      urgencyPriorityRules: [v => !!v || "urgency priority is required"],
+      itemCodeRules: [v => !!v || "Item code is required"],
+
+      itemDescriptionRules: [v => !!v || "Item description is required"],
+      scopeOfWorkRules: [v => !!v || "scope of work is required"],
+      scopeDescriptionRules: [v => !!v || "scope description is required"],
+      materialCodeRules: [v => !!v || "material code is required"],
+      materialDescriptionRules: [
+        v => !!v || "material description is required"
+      ],
+      infoPriceRules: [v => !!v || "info price is required"],
+      quantityRules: [v => !!v || "quantity is required"],
+      uomRules: [v => !!v || "uom code is required"]
+    },
+    name: "EditRequisition",
     loading: true,
     overlay: true,
     dialog: false,
+    overlayInside: false,
+    updateConfirmationModal: false,
     cancelConfimationDialog: false,
-    form2: [],
+    urgency: [
+      {
+        text: "Low Prioirty",
+        value: "LP"
+      },
+      {
+        text: "Medium Priority",
+        value: "MP"
+      },
+      {
+        text: "High Priority",
+        value: "High"
+      }
+    ],
     form: {
       projectId: "",
       projectName: "",
@@ -307,12 +414,13 @@ export default {
       requiredDate: "",
       urgencyPriority: "",
       checkedBy: "",
+      id: "",
       lineDetails: [
         {
           itemCode: "",
           itemDescription: "",
           scopeOfWork: "",
-          scopeDesription: "",
+          scopeDescription: "",
           materialCode: "",
           materialDescription: "",
           lineRemarks: "",
@@ -320,15 +428,20 @@ export default {
           quantity: "",
           uom: ""
         }
-      ]
+      ],
+      lineDetailsDeleted: []
     }
   }),
 
-  created() {
-    axios.defaults.headers.common["Authorization"] = "Bearer " + this.getToken;
+  watch: {
+    selectedApiValue() {
+      this.insertSelectedItem();
+    }
+  },
 
-    axios
-      .get(`/requisition-slip/edit/${this.$route.params.id}`)
+  created() {
+    this.$store
+      .dispatch("requisitionSlip/getItemInfo", this.$route.params.id)
       .then(response => {
         let result = response.data;
         let resultHeader = result.header[0];
@@ -346,14 +459,17 @@ export default {
           requiredDate: resultHeader.U_ReqDate,
           urgencyPriority: resultHeader.U_Urgency,
           checkedBy: resultHeader.U_CheckedBy,
-          lineDetails: []
+          id: resultHeader.DocEntry,
+          lineDetails: [],
+          lineDetailsDeleted: []
         };
         let lineDetails = result.lineDetails.map(val => {
           return {
+            id: val.id,
             itemCode: val.U_ItemCode,
             itemDescription: val.U_Dscription,
             scopeOfWork: val.U_Scope,
-            scopeDesription: val.U_ScopeDesc,
+            scopeDescription: val.U_ScopeDesc,
             materialCode: val.U_MaterialCode,
             materialDescription: val.U_MaterialDesc,
             lineRemarks: val.U_LineRemarks,
@@ -364,25 +480,18 @@ export default {
         });
         this.form.lineDetails = lineDetails;
       })
-      .catch(err => {
-        console.error(err);
-      })
-      .finally(() => {
+      .then(response => {
         this.overlay = !this.overlay;
         this.dialog = !this.dialog;
       });
   },
 
   computed: {
-    ...mapGetters(["getRequisitionSlips"]),
-    ...mapState(["token"]),
-    ...mapActions(["retrieveRequisitionSlips"]),
-    getToken() {
-      return this.token;
+    selectedApiValue() {
+      return this.$store.getters["oitm/watchApiChange"];
     },
-
-    getRequisitionSlips() {
-      return this.getRequisitionSlips;
+    getToken() {
+      return this.$store.getters["auth/getToken"];
     },
     dateToday() {
       return moment().format("YYYY-MM-DD");
@@ -401,6 +510,7 @@ export default {
   methods: {
     addLineDetails() {
       this.form.lineDetails.push({
+        id: 0,
         itemCode: "",
         itemDescription: "",
         scopeOfWork: "",
@@ -416,6 +526,9 @@ export default {
 
     removeLineDetails(index) {
       if (this.form.lineDetails.length !== 1) {
+        if (this.form.lineDetails[index].id) {
+          this.form.lineDetailsDeleted.push(this.form.lineDetails[index].id);
+        }
         this.form.lineDetails.splice(index, 1);
       }
     },
@@ -424,50 +537,54 @@ export default {
     },
     close() {
       this.$router.back();
-      setTimeout(() => {
-        this.form = {
-          projectId: "",
-          projectName: "",
-          location: "",
-          supplier: "",
-          preferredSupplier: "",
-          documentNumber: "",
-          status: "O",
-          documentDate: moment().format("MM-DD-YYYY"),
-          requiredDate: "",
-          urgencyPriority: "",
-          preparedBy: "",
-          checkedBy: "",
-          lineDetails: [
-            {
-              itemCode: "",
-              itemDescription: "",
-              scopeOfWork: "",
-              scopeDesription: "",
-              materialCode: "",
-              materialDescription: "",
-              lineRemarks: "",
-              infoPrice: 0,
-              quantity: "",
-              uom: ""
-            }
-          ]
-        };
-      }, 300);
     },
-    createItem() {
-      axios.defaults.headers.common["Authorization"] =
-        "Bearer " + this.getToken;
 
-      axios
-        .post("/requisition-slip/create", this.$data.form)
-        .then(response => {
-          this.retrieveRequisitionSlips();
-          this.close();
-        })
-        .catch(error => {
-          console.error(error);
+    getOitm(index) {
+      this.overlayInside = true;
+      this.$store.dispatch("oitm/getOitm", index).then(response => {
+        this.overlayInside = false;
+      });
+    },
+
+    insertSelectedItem() {
+      let index = this.$store.getters["oitm/getSelectedIndex"];
+      let value = this.$store.getters["oitm/getApiSelectedValue"];
+
+      this.form.lineDetails[index].materialCode = value;
+    },
+
+    updateItem() {
+      if (this.$refs.form.validate()) {
+        axios.defaults.headers.common[
+          "Authorization"
+        ] = `Bearer ${this.getToken}`;
+
+        axios
+          .patch(`/requisition-slip/update`, this.$data.form)
+          .then(response => {
+            this.$store.dispatch(
+              "requisitionSlip/retrieveRequisitionSlipsAction"
+            );
+            Swal.fire({
+              type: "success",
+              title: "Item Updated!",
+              showConfirmButton: true,
+              timer: 3000
+            });
+            this.close();
+          })
+          .catch(error => {
+            console.error(error);
+          });
+      } else {
+        this.updateConfirmationModal = false;
+        Swal.fire({
+          type: "error",
+          showCloseButton: true,
+          title: "Missing / Invalid Input",
+          text: "Please check your form for some missing required inputs"
         });
+      }
     }
   }
 };

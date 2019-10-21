@@ -3,7 +3,7 @@ window.moment = require('moment');
 require('./bootstrap');
 window.Vue = require('vue');
 import Vuex from 'vuex';
-import StoreData from './store';
+import StoreData from './store/store';
 import VueRouter from 'vue-router';
 import Vuetify from 'vuetify';
 import {routes} from './routes';
@@ -11,7 +11,6 @@ import 'vuetify/dist/vuetify.min.css'
 import 'material-design-icons-iconfont/dist/material-design-icons.css'
 import '@mdi/font/css/materialdesignicons.css'
 import MainApp from './components/MainApp.vue';
-import Axios from 'axios';
 const vuetifyOptions = { }
 Vue.use(Vuetify)
 Vue.use(VueRouter)
@@ -32,7 +31,7 @@ router.beforeEach((to, from, next) => {
   if (to.matched.some(record => record.meta.requiresAuth)) {
     // this route requires auth, check if logged in
     // if not, redirect to login page.
-    if (!store.getters.isLoggedIn) {
+    if (!store.getters['auth/isLoggedIn']) {
       next({
         path: '/login',
       })
@@ -42,7 +41,7 @@ router.beforeEach((to, from, next) => {
   } else if (to.matched.some(record => record.meta.requiresVisitor)) {
     // this route requires auth, check if logged in
     // if not, redirect to login page.
-    if (store.getters.isLoggedIn) {
+    if (store.getters['auth/isLoggedIn']) {
       next({
         path: '/',
       })

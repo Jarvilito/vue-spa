@@ -17,6 +17,7 @@ Route::middleware('auth:api')->group(function () {
     Route::get('/requisition-slip', 'RequisitionSlipController@index');
     Route::post('/requisition-slip/create', 'RequisitionSlipController@store');
     Route::get('/requisition-slip/edit/{id}', 'RequisitionSlipController@edit');
+    Route::patch('/requisition-slip/update', 'RequisitionSlipController@update');
     Route::get('/oitm/all/api', 'ApiController@getAllOITM');
     Route::post('/logout', 'AuthController@logout');
     Route::get('/user', function (Request $request) {

@@ -1,20 +1,30 @@
 <template>
   <nav class="mb-4">
     <template v-if="isLoggedIn">
-      <v-navigation-drawer v-model="drawer" app color="purple darken-3" class="pt-4 pb-4">
+      <v-navigation-drawer v-model="drawer" app color="blue darken-4" class="pt-4 pb-4">
         <v-list rounded dark>
-          <v-subheader class="font-italic font-weight-medium headline">{{getUser}}</v-subheader>
-          <v-divider></v-divider>
-          <v-list-item-group v-model="item" color="white">
+          <v-list-item>
+            <v-list-item-avatar color="green">
+              <v-icon dark>mdi-account-circle</v-icon>
+            </v-list-item-avatar>
+            <v-list-item-content class="font-italic font-weight-medium headline">{{getUser}}</v-list-item-content>
+          </v-list-item>
+          <v-divider class="grey lighten-3"></v-divider>
+          <v-list-group no-action color="white" prepend-icon="folder" value="true">
+            <template v-slot:activator>
+              <v-list-item-content>
+                <v-list-item-title>Modules</v-list-item-title>
+              </v-list-item-content>
+            </template>
             <v-list-item v-for="(link,i) in links" :key="i" router :to="link.route">
-              <v-list-item-icon>
-                <v-icon v-text="link.icon"></v-icon>
-              </v-list-item-icon>
               <v-list-item-content>
                 <v-list-item-title class="font-weight-light" v-text="link.text"></v-list-item-title>
               </v-list-item-content>
+              <v-list-item-icon>
+                <v-icon v-text="link.icon"></v-icon>
+              </v-list-item-icon>
             </v-list-item>
-          </v-list-item-group>
+          </v-list-group>
         </v-list>
       </v-navigation-drawer>
     </template>
@@ -69,7 +79,7 @@ export default {
 
   methods: {
     logOut() {
-      this.$store.dispatch("logout").then(response => {
+      this.$store.dispatch("auth/logout").then(response => {
         this.$router.push("/login");
       });
     }
@@ -77,12 +87,12 @@ export default {
 
   computed: {
     getUser() {
-      return this.$store.getters.getCurrentUser
-        ? this.$store.getters.getCurrentUser.name
+      return this.$store.getters["auth/getCurrentUserData"]
+        ? this.$store.getters["auth/getCurrentUserData"].name
         : null;
     },
     isLoggedIn() {
-      return this.$store.getters.isLoggedIn;
+      return this.$store.getters["auth/isLoggedIn"];
     }
     // ...mapGetters(["currentUser"]),
     // ...mapState(["post"])

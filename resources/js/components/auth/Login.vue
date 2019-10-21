@@ -74,15 +74,15 @@ export default {
       //   }
       if (this.$refs.form.validate()) {
         this.$store
-          .dispatch("retrieveToken", {
+          .dispatch("auth/retrieveToken", {
             email: this.username,
             password: this.password
           })
           .then(response => {
-            this.$router.push("/");
+            this.$store.dispatch("auth/getUserInfo");
           })
           .then(response => {
-            this.$store.dispatch("getUserInfo");
+            this.$router.push("/");
           });
       }
     }
@@ -101,7 +101,7 @@ export default {
   },
   computed: {
     authError() {
-      return this.$store.getters.authError;
+      return this.$store.getters["auth/authError"];
     }
   }
 };

@@ -1,24 +1,41 @@
 <template>
   <div>
-    <v-dialog persistent v-model="dialogOitm" max-width="290">
+    <v-dialog persistent v-model="dialogOitm" scrollable style="max-height: 400px;" width="550">
       <v-card>
-        <v-card-title class="headline">Use Google's location service?</v-card-title>
-
-        <v-card-text>
-          <v-list>
-            <v-list-item-group>
-              <v-list-item v-for="(item, i) in otim" :key="i">
-                <v-list-item-content>
-                  <v-list-item-title @click="insertCode(item.cardCode, i)" v-text="item.cardCode"></v-list-item-title>
-                </v-list-item-content>
-              </v-list-item>
-            </v-list-item-group>
-          </v-list>
-        </v-card-text>
-
-        <v-card-actions>
+        <v-card-title>
+          Select Item Code
           <v-spacer></v-spacer>
-          <v-btn color="red darken-1" text @click="closeDialogOitm">Close</v-btn>
+          <v-text-field
+            v-model="search"
+            append-icon="search"
+            label="Search"
+            single-line
+            hide-details
+          ></v-text-field>
+        </v-card-title>
+
+        <v-data-table
+          :search="search"
+          v-model="selected"
+          single-select
+          item-key="itemCode"
+          show-select
+          :headers="headers"
+          :items="oitm"
+          :items-per-page="5"
+          class="elevation-1"
+        >
+          <template v-slot:item.itemCode="{ item }">
+            <v-chip color="blue darken-4" dark>{{ item.itemCode }}</v-chip>
+          </template>
+          <template v-slot:item.itemName="{ item }">
+            <v-chip color="blue lighten-1" dark>{{ item.itemName }}</v-chip>
+          </template>
+        </v-data-table>
+        <v-card-actions class="p-2">
+          <v-spacer></v-spacer>
+          <v-btn large color="success" :disabled="!selected.length" text @click="insertCode">ADD</v-btn>
+          <v-btn large color="red" text @click="closeDialogOitm">Close</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -29,37 +46,44 @@
 export default {
   name: "Oitm",
   data: () => ({
-    // otim: []
+    selected: [],
+    search: "",
+    headers: [
+      {
+        text: "Item Code",
+        alight: "left",
+        sortable: true,
+        value: "itemCode"
+      },
+      {
+        text: "Item Name",
+        alight: "left",
+        sortable: true,
+        value: "itemName"
+      }
+    ]
   }),
   components: {},
+  created() {
+    this.getOitm = this.$store.getters["oitm/getOitm"];
+  },
   computed: {
     dialogOitm() {
-      return this.$store.getters.dialogOitm;
+      return this.$store.getters["oitm/dialogOitm"];
     },
 
-    otim() {
-      return this.$store.getters.getRequisitionSlipsHeader;
+    oitm() {
+      return this.$store.getters["oitm/getOitm"];
     }
   },
   methods: {
-    openOitm() {
-      // if(this.item)
-      // {
-      //     axios here...
-      // }
-
-      // dialog open here....
-
-      axios.get("/oitm/all/api").then(response => {
-        this.otim = response.data;
-      });
-    },
-
-    insertCode(value, index) {
-      this.$store.commit("updateSelectedOitm", value);
+    insertCode() {
+      this.$store.commit("oitm/updateSelectedOitm", this.selected[0].itemCode);
+      this.selected = [];
     },
     closeDialogOitm() {
-      this.$store.commit("closeDialogOitm");
+      this.selected = [];
+      this.$store.commit("oitm/closeDialogOitm");
     }
   }
 };

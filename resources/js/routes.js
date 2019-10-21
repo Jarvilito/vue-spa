@@ -6,10 +6,10 @@ import BlankPage from "./components/BlankPage.vue"
 export const routes = [
     { 
       path: '/' , 
-      component: require('./components/Dashboard.vue').default, 
+      component: require('./components/BlankPage.vue').default, 
       meta: {
         requiresAuth: true,
-    }
+      }
   },
     { 
       path: '/requisition-slip', component: MainRequisition,      

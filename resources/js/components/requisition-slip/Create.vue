@@ -1,15 +1,24 @@
 <template>
   <div>
-    <v-btn @click.stop="createNew" class="mt-4 mr-4" fab dark color="green">
-      <v-icon dark>mdi-pencil</v-icon>
+    <v-btn @click.stop="createNew" class="mt-4 mr-4" fab dark color="blue darken-4">
+      <v-icon dark>mdi-plus</v-icon>
     </v-btn>
     <v-dialog v-model="requisitionDialog" max-width="80%">
+      <v-overlay :value="overlay">
+        <v-progress-circular indeterminate size="64"></v-progress-circular>
+      </v-overlay>
       <v-card class="text-uppercase">
-        <v-card-title>
-          <span class="teal--text text--darken-4">Create Requisition Slip</span>
-        </v-card-title>
-        <v-divider></v-divider>
-        <v-card-text>
+        <v-list-item>
+          <v-list-item-avatar color="blue darken-4">
+            <v-icon dark>mdi-pencil</v-icon>
+          </v-list-item-avatar>
+          <v-list-item-content>
+            <v-list-item-title class="headline">CREATE REQUISITION SLIP</v-list-item-title>
+            <v-list-item-subtitle>Prepared By {{this.form.preparedBy}}</v-list-item-subtitle>
+          </v-list-item-content>
+        </v-list-item>
+
+        <v-card-text class="mt-4">
           <v-form ref="form" v-model="valid" lazy-validation class="px-3">
             <v-row>
               <v-col sm="12" md="5">
@@ -126,7 +135,7 @@
               <v-col offset-md="2" sm="12" md="5">
                 <v-select
                   height="35"
-                  :items="form.urgency"
+                  :items="urgency"
                   item-value="value"
                   item-text="text"
                   menu-props="auto"
@@ -232,6 +241,7 @@
                         <v-text-field
                           required
                           @click="getOitm(index)"
+                          readonly
                           :rules="rules.materialCodeRules"
                           v-model="lineDetail.materialCode"
                           clearable
@@ -299,7 +309,13 @@
         </v-card-text>
         <v-card-actions>
           <div class="flex-grow-1"></div>
-          <v-btn :disabled="!valid" color="green darken-1" x-large text @click="createItem">CREATE</v-btn>
+          <v-btn
+            :disabled="!valid"
+            color="green darken-1"
+            x-large
+            text
+            @click.prevent="submitConfirmationDialog = true"
+          >CREATE</v-btn>
           <v-btn color="red darken-1" x-large text @click="cancelConfimationDialog = true">CANCEL</v-btn>
         </v-card-actions>
       </v-card>
@@ -318,6 +334,20 @@
           </v-card-actions>
         </v-card>
       </v-dialog>
+
+      <!-- SUBMIT CONFIRMATION DIALOG -->
+      <v-dialog v-model="submitConfirmationDialog" width="350">
+        <v-card>
+          <v-card-title class="headline blue--text">Create Requisition Slip</v-card-title>
+          <v-card-text>Are you sure you want to submit your form?</v-card-text>
+          <v-card-actions>
+            <div class="flex-grow-1"></div>
+            <v-btn color="green darken-1" text @click="createItem">Yes</v-btn>
+
+            <v-btn color="red darken-1" text @click="submitConfirmationDialog = false">No</v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
     </v-dialog>
     <Oitm />
     <!-- cancel snackbar -->
@@ -332,6 +362,7 @@ export default {
     Oitm
   },
   data: () => ({
+    overlay: false,
     valid: true,
     rules: {
       projectNameRules: [v => !!v || "Project namme is required"],
@@ -354,9 +385,23 @@ export default {
       quantityRules: [v => !!v || "quantity is required"],
       uomRules: [v => !!v || "uom code is required"]
     },
-
+    submitConfirmationDialog: false,
     cancelConfimationDialog: false,
     requisitionDialog: false,
+    urgency: [
+      {
+        text: "Low Prioirty",
+        value: "LP"
+      },
+      {
+        text: "Medium Priority",
+        value: "MP"
+      },
+      {
+        text: "High Priority",
+        value: "High"
+      }
+    ],
     form: {
       projectId: "",
       projectName: "",
@@ -365,23 +410,9 @@ export default {
       preferredSupplier: "",
       preparedBy: "",
       documentNumber: "",
-      status: "O",
-      documentDate: moment().format("MM-DD-YYYY"),
+      status: "",
+      documentDate: "",
       requiredDate: "",
-      urgency: [
-        {
-          text: "Low Prioirty",
-          value: "LP"
-        },
-        {
-          text: "Medium Priority",
-          value: "MP"
-        },
-        {
-          text: "High Priority",
-          value: "High"
-        }
-      ],
       urgencyPriority: "",
       checkedBy: "",
       lineDetails: [
@@ -409,14 +440,18 @@ export default {
 
   computed: {
     selectedApiValue() {
-      return this.$store.state.watchApiChange;
+      return this.$store.getters["oitm/watchApiChange"];
     },
     getToken() {
-      return this.$store.state.token;
+      return this.$store.getters["auth/getToken"];
     },
 
-    getRequisitionSlips() {
-      return this.$store.getters.getRequisitionSlips;
+    getCurrentUser() {
+      return this.$store.getters["auth/getCurrentUserData"].name;
+    },
+
+    getRequisitionSlipsLastId() {
+      return this.$store.getters["requisitionSlip/getRequisitionSlipsLastId"];
     },
     dateToday() {
       return moment().format("YYYY-MM-DD");
@@ -434,15 +469,19 @@ export default {
   },
   methods: {
     getOitm(index) {
-      this.$store.dispatch("getOitm", index);
+      this.overlay = true;
+      this.$store.dispatch("oitm/getOitm", index).then(response => {
+        this.overlay = false;
+      });
     },
 
     insertSelectedItem() {
-      let index = this.$store.getters.getSelectedIndex;
-      let value = this.$store.getters.getApiSelectedValue;
+      let index = this.$store.getters["oitm/getSelectedIndex"];
+      let value = this.$store.getters["oitm/getApiSelectedValue"];
 
       this.form.lineDetails[index].materialCode = value;
     },
+
     addLineDetails() {
       this.form.lineDetails.push({
         itemCode: "",
@@ -472,40 +511,18 @@ export default {
       this.cancelConfimationDialog = true;
     },
     close() {
-      this.cancelConfimationDialog = false;
       this.requisitionDialog = false;
-      setTimeout(() => {
-        this.$refs.form.reset();
-        this.form.lineDetails = [
-          {
-            itemCode: "",
-            itemDescription: "",
-            scopeOfWork: "",
-            scopeDesription: "",
-            materialCode: "",
-            materialDescription: "",
-            lineRemarks: "",
-            infoPrice: 0,
-            quantity: "",
-            uom: ""
-          }
-        ];
-      }, 300);
+      this.cancelConfimationDialog = false;
+      this.$refs.form.reset();
     },
 
     createNew() {
       this.requisitionDialog = true;
-      if (this.getRequisitionSlips.length) {
-        this.form.documentNumber =
-          this.getRequisitionSlips[this.getRequisitionSlips.length - 1]
-            .DocEntry + 1;
-      } else {
-        this.form.documentNumber = 1;
-      }
-
-      this.form.preparedBy = this.$store.getters.getCurrentUser.name;
+      this.form.preparedBy = this.getCurrentUser;
+      let id = this.$store.getters["requisitionSlip/getRequisitionSlipsLastId"];
+      this.form.documentNumber = id ? id + 1 : 1;
       this.form.status = "O";
-      this.form.documentDate = moment().format("MM-DD-YYYY");
+      this.form.documentDate = moment().format("YYYY-MM-DD");
     },
 
     createItem() {
@@ -516,12 +533,29 @@ export default {
         axios
           .post("/requisition-slip/create", this.$data.form)
           .then(response => {
-            this.$store.dispatch("retrieveRequisitionSlips");
+            this.$store.dispatch(
+              "requisitionSlip/retrieveRequisitionSlipsAction"
+            );
+            Swal.fire({
+              type: "success",
+              showConfirmButton: true,
+              title: "Requisition Slip Created!",
+              showConfirmButton: false,
+              timer: 2500
+            });
             this.close();
           })
           .catch(error => {
             console.error(error);
           });
+      } else {
+        this.submitConfirmationDialog = !this.submitConfirmationDialog;
+        Swal.fire({
+          type: "error",
+          showCloseButton: true,
+          title: "Missing / Invalid Input",
+          text: "Please check your form for some missing required inputs"
+        });
       }
     }
   }
